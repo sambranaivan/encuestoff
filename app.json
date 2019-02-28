@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Encuestas Carnaval",
-    "slug": "encuestas_carnaval",
+    "name": "Encuestas Pesca",
+    "slug": "encuestas_pesca",
     "privacy": "public",
     "sdkVersion": "32.0.0",
     "platforms": [
@@ -24,7 +24,7 @@
       "supportsTablet": true
     },
     "android":{
-      "package":"com.sambrana.roll"
+      "package":"com.sambrana.pesca"
     }
   }
 }

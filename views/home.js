@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, NetInfo, Image, TouchableOpacity, AsyncStorage, AppRegistry, Alert, CameraRoll} from 'react-native';
+import { StyleSheet, Text, View, NetInfo, Image, TouchableOpacity, AsyncStorage, AppRegistry, Alert, CameraRoll, Button} from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { Constants, Location, Permissions } from 'expo';
 
@@ -58,7 +58,7 @@ export default class Home extends Component {
     formData.append('photo', { uri: localUri, name: filename, type });
 
     // console.log(formData);
-    response = await fetch('http://13.90.59.76/test/upload.php', {
+    response = await fetch('http://sambrana.com.ar/test/upload.php', {
       method: 'POST',
       body: formData,
       header: {
@@ -71,6 +71,15 @@ export default class Home extends Component {
 
   enviar = async () => {
     // check conecttion
+    // Alert.alert(
+    //   'Encuestas Actualizada',
+    //   'Presione Aceptar para continuar',
+    //   [
+    //     { text: 'Aceptar', onPress: () => console.log('OK Pressed') },
+    //   ],
+    //   { cancelable: false },
+    // );
+    // return 
     if ( this.state.isConnected )
     {
 
@@ -87,9 +96,9 @@ export default class Home extends Component {
      if (data !== null)//ya hay algo cargado?
      {
       // enviar la data
-
+      console.log(data);
        // http://localhost/apiEncuestoff/public/api/carnaval/send
-       const myRequest = new Request('http://'+server+'api/carnaval/send',
+       const myRequest = new Request('http://'+server+'api/pesca/send',
          {
            method: 'POST',
            body: data
@@ -181,6 +190,9 @@ export default class Home extends Component {
    
   }
 
+  /** 
+   * 
+  */
   ViewData = async()=>{
     try {
       let data = await AsyncStorage.getItem('data');
@@ -195,6 +207,8 @@ export default class Home extends Component {
     try {
       AsyncStorage.removeItem('data');
       console.log("limpio");
+      alert("Encuestas Borradas, contador en 0")
+      this.setState({ count: 0 });
     } catch (error) {
       console.log(error)
     }
@@ -209,7 +223,7 @@ export default class Home extends Component {
   }
 
 
-  // Check internte
+  // Comprobando Conexion a Internet
   componentDidMount() {
     NetInfo.isConnected.addEventListener(
       'connectionChange',
@@ -218,17 +232,14 @@ export default class Home extends Component {
     NetInfo.isConnected.fetch().done(
       (isConnected) => { this.setState({ isConnected }); }
     );
-
+      ///inicializo el contador
       this._getRegCount();
-
-
-
-  
-      // this._getPhotosAsync().catch(error => {
-      //   console.error(error);
-      // });
-
-    
+     
+      
+      //CAMERAROLL
+      this._getPhotosAsync().catch(error => {
+        console.error(error);
+      });    
   }
 
   
@@ -255,9 +266,20 @@ export default class Home extends Component {
       count = 0;
     }
 
+    
+
     console.log(count);
     this.setState({count:count});
+    AsyncStorage.setItem('count', count.toString());
+    // a partir de aca leo las variables internas nomas?
+    setInterval(this._updateCount,30000)
 
+  }
+
+  _updateCount = async () =>{
+    let data = await AsyncStorage.getItem('count');
+    console.log(data);
+    this.setState({ count: data });
   }
 
   _handleConnectivityChange = (isConnected) => {
@@ -278,7 +300,7 @@ export default class Home extends Component {
           flexDirection: 'row',
         }}>
          
-        <Image source={require('../assets/images/carnaval.png')} style={{ height: "100%", resizeMode: "contain",flex:1 }} />
+        {/* <Image source={require('../assets/images/carnaval.png')} style={{ height: "100%", resizeMode: "contain",flex:1 }} /> */}
         </View>
         <View style={styles.container}>
           <Spinner
@@ -289,7 +311,7 @@ export default class Home extends Component {
 
          
       
-           {/* <Button title="borrar" onPress={this.CleanData}/> */}
+           {/* <Button title="Limpiar Conteo" onPress={this.CleanData}/> */}
           <Text>{this.state.isConnected ? 'Online' : 'Offline'}</Text>
           <Text style={{fontSize:12}}>Total de Encuestas: ({this.state.count})</Text>
             <TouchableOpacity onPress={() => this.props.navigation.navigate("Encuesta")} style={styles.button}>

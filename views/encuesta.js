@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView, Button, Platform,Image, AsyncStorage, TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Button,Alert, Platform,Image, AsyncStorage, TouchableOpacity} from 'react-native';
 import { Constants, Location, Permissions } from 'expo';
 import t from 'tcomb-form-native';
 import MultiSelect from 'react-native-multiple-select';
@@ -9,87 +9,223 @@ const Form = t.form.Form;
 
 // // // // // // // // // // // // //
 // Esto va a cambiar a cada rato
+const gastos = t.enums({
+    a: 'Menos de $500',
+    b: 'Entre $500 y $1.000',
+    c: 'Entre $1.000 y $2.000',
+    d: 'Entre $2.000 y $3.000',
+    e: 'Entre $3.000 y $5.000',
+    f: 'Más de $5.000',
+    g: 'No usaron',
+    h: 'Ns/Nc',
+})
+const gastos_14 = t.enums({
+    a: 'Menos de $500',
+    b: 'Entre $500 y $1.000',
+    c: 'Entre $1.000 y $2.000',
+    d: 'Entre $2.000 y $3.000',
+    e: 'Entre $3.000 y $5.000',
+    f: 'Más de $5.000',
+    g: 'No Consumieron',
+    h: 'Ns/Nc',
+})
 
-const User = t.struct({
-    latitud:t.maybe(t.Number),
-    longitud: t.maybe(t.Number),
-    procedencia: t.String,
-    sexo: t.enums({
-        'F': 'Femenino',
-        'M': 'Masculino'
-    }, 'Sexo'),
-    edad: t.Number,
-  
-    viaje: t.maybe(t.enums({
-        solo: 'Solo',
-        pareja: 'Pareja',
-        familia: 'Familia',
-        amigos: 'Amigos',
+const Formulario = t.struct({
+    latitud:t.maybe(t.Number),///automaticos
+    longitud: t.maybe(t.Number),///automaticos
+    userid: t.String,
+    timestamp: t.maybe(t.String),
+    localidad:t.String,
+    concurso:t.String,
+    fecha:t.String,
+    procedencia: t.String,//lugar de residencia
+    cuantas_personas:t.Number,
+    tipo_alojamiento:t.maybe( t.enums({ //maybe
+        vivienda_propia:'Vivienda Propia',
+        vivienda_familiares:'Vivienda de Familiares o Amigos',
+        'Hotel':'Hotel',
+        'Apart Hotel':'Apart',
+        'Boutique':'Boutique',
+        'Hosteria':' Hostería',
+        "Residencia o Similar":'Residencia o Similar',
+        "Cabaña":'Cabaña o Pesquero',
+        "Carpa":'Carpa en Camping'
+    }, '¿En qué tipo de alojamiento se hospedan?')),
+    cuantas_noches:t.maybe(t.Number), //maybe
+    gasto_alojamiento:t.maybe(t.enums({ //maybe
+        a: 'Menos de $500',
+        b: 'Entre $500 y $1.000',
+        c: 'Entre $1.000 y $2.000',
+        d: 'Entre $2.000 y $5.000',
+        e: 'Entre $5.000 y $10.000',
+        f: 'Más de $10.000',
+        g: 'No Pagaron',
+        h: 'Ns/Nc',
     })),
-    viaje_cantidad: t.maybe(t.Number),///autofill, condicional por viaje
-    informo: t.enums({
-        internet: 'Redes Sociales (Facebook, Instagram, Twitter, Whatsapp)',
-        medios: 'Medios de Comunicación (tv, radio)',
-        otro:'Otro'
+    cuantos_dias:t.maybe(t.enums({//maybe
+        uno:'Solo una',dos:'Dos',tres: 'Tres',cuatro: 'Cuatro',cinco: 'Cinco'
+    })),
+    cuantas_participo:t.enums({
+        una:'Una',dos:'Dos',tres_cuatro:'Tres o Cuatro',cinco_nueve:'Cinco a Nueve',diez_mas:'Diez o más',nunca:'Nunca'
     }),
-    otros_informo: t.maybe(t.String),//condicional de por donde se informo
-    motivo: t.maybe(t.enums({
-        vacaciones: 'Vacaciones',
-        religion: 'Religion',
-        trabajo: "Trabajo",
-        visita: "Visita Flia/Amigos",
-        salud: "Salud",
-        otro: "Otro"
+    informo:t.maybe(t.enums({//maybe
+        revista:"Revistas especializadas",
+        web:"Páginas Web/ Foros especializados",
+        publicidad:"Por avisos publicitarios en diarios/radios/TV/Revistas",
+        familia:"Comentarios de conococidos/familiares/amigos",
+        club_pesca:"Club de Pesca",
+        pena_pesca:"Peña de pesca",
+        internet:"Redes Sociales",
     })),
-    otro_motivo: t.maybe(t.String),//condicional de motivo de viaje
-    transporte: t.maybe(t.enums({
-        omnibus: 'Omnibus',
-        auto: 'Automovil',
-        corrientes: 'Aeropuerto Corrientes',
-        resistencia: 'Aeropuerto Resistencia',
-        moto: 'Moto',
-        otro: 'Otro'
-    })),
-    otro_transporte: t.maybe(t.String),//condicional de transporte de viaje
-
-    alojamiento: t.maybe(t.enums({
-        corrientes: 'Corrientes',
-        empedrado: 'Empedrado',
-        itati: 'Itatí',
-        paso: 'Paso de la Patria',
-        Ramada: 'Ramada Paso',
-        sancosme: 'San Cosme',
-        santaana: 'Santa Ana de los Guacaras',
-        resistencia: 'Resistencia'
-    })),
-    tipoalojamiento: t.maybe(t.enums({
-       hotel:"Hotel",
-       casa:"Casa",
-       dpto:"Departamento"
-    })),
-
-    primeravez: t.enums({
-        si: 'Si',
-        no: 'No'
+    // Pregunta 9 tabla
+    gasto_salida: gastos,
+    uso_guia:t.enums({
+        'Si': 'Sí', 'No': 'No'
     }),
 
-    recomendaria: t.enums({
-        si: 'Si', no: 'No', talvez: 'Tal Vez'
+    participo_pesca: t.enums({
+        esta_provincia: 'En esta provincia',
+        otra_provincia: 'En otras provincias',
+        ambas:'En esta y en otras provincias',
+        no_participo: 'No participó de otros concursos'
     }),
 
-    gastos: t.maybe(t.enums(
-        {
-            a: 'Menos de $500',
-            b: 'De $500 a $1.000',
-            c: 'Entre $1.000 y $3.000',
-            d: 'Más de $3.000',
-            e: 'No sabe No Contesta'
-        })),
-    userid: t.String,timestamp: t.maybe(t.String)
+    // 11.
+    modalidad_pesca: t.enums({
+        "Bait casting":"Bait casting",
+        "Spinning":"Spinning",
+        "Trolling":"Trolling",
+        "Fly Fishing":"Fly Fishing",
+        "Con Carnada":"Con Carnada"
+
+    }),
+    // 12.De que actividades vinculadas al concurso participó o pinsar participar?
+    actividad_cena: t.enums({
+        'Si':'Si','No':'No','No hay':'No hay'
+    }),
+    // 12.De que actividades vinculadas al concurso participó o pinsar participar?
+    actividad_show: t.enums({
+        'Si': 'Si', 'No': 'No', 'No hay': 'No hay'
+    }),
+    // 12.De que actividades vinculadas al concurso participó o pinsar participar?
+    actividad_exposicion: t.enums({
+        'Si': 'Si', 'No': 'No', 'No hay': 'No hay'
+    }),
+    // 12.De que actividades vinculadas al concurso participó o pinsar participar?
+    actividad_feria: t.enums({
+        'Si': 'Si', 'No': 'No', 'No hay': 'No hay'
+    }),
+    // 12.De que actividades vinculadas al concurso participó o pinsar participar?
+    // actividad_: t.enums({
+    //     'Si': 'Si', 'No': 'No', 'No hay': 'No hay'
+    // }),
+    // 13.
+    volveria:t.enums({
+        'Muy probable':'Muy probable',
+        'Probable':'Probable',
+        'Poco Probable':'Poco Probable',
+        'Nada Probable':'Nada Probable'
+    }),
+
+    // 14.
+    gastos_alimentos: t.maybe(gastos_14),//maybe
+    gastos_artesanias: t.maybe(gastos_14),//maybe
+    // gastos_equipo_pesca: gastos_14,
+    // gastos_excursiones: gastos_14,
+    gastos_transporte: t.maybe(gastos_14),//maybe
+    // 15.
+    volveria_visitar:t.maybe(t.enums({//maybe
+        'Si':'Si','No':'No'
+    })),
+    volveria_porque:t.maybe(t.String),//maybe
+    //16 tabla
+    evalua_alojamiento:t.maybe(t.enums({///maybe
+        a:'Muy Buena',
+        b: 'Buena',
+        c: 'Regular',
+        d: 'Mala',
+        e: 'Muy Mala',
+        z: 'No Usó'
+    })),
+    evalua_gastronomia: t.maybe(t.enums({//tmaybe
+        a: 'Muy Buena',
+        b: 'Buena',
+        c: 'Regular',
+        d: 'Mala',
+        e: 'Muy Mala',
+        z: 'No Usó'
+    })),
+    evalua_info_turistica: t.maybe(t.enums({//tmaybe
+        a: 'Muy Buena',
+        b: 'Buena',
+        c: 'Regular',
+        d: 'Mala',
+        e: 'Muy Mala',
+        z: 'No Usó'
+    })),
+    evalua_excursiones:t.maybe(t.enums({//tmaybe
+        a:'Muy Buena',
+        b: 'Buena',
+        c: 'Regular',
+        d: 'Mala',
+        e: 'Muy Mala',
+        z:'No Usó'
+    })),
+    evalua_limpieza:t.maybe( t.enums({//tmaybe
+        a: 'Muy Buena',
+        b: 'Buena',
+        c: 'Regular',
+        d: 'Mala',
+        e: 'Muy Mala',
+
+    })),
+    evalua_seguridad:t.maybe( t.enums({//tmaybe
+        a: 'Muy Buena',
+        b: 'Buena',
+        c: 'Regular',
+        d: 'Mala',
+        e: 'Muy Mala',
+ 
+    })),
+    evalua_naturaleza:t.maybe( t.enums({//tmaybe
+        a: 'Muy Buena',
+        b: 'Buena',
+        c: 'Regular',
+        d: 'Mala',
+        e: 'Muy Mala',
+    })),
+    evalua_accesso:t.maybe( t.enums({//tmaybe
+        a: 'Muy Buena',
+        b: 'Buena',
+        c: 'Regular',
+        d: 'Mala',
+        e: 'Muy Mala',
+    }))
+
+
+
+
 });
 
+var today = new Date();
+var dd = today.getDate();
+var mm = today.getMonth() + 1; //January is 0!
+
+var yyyy = today.getFullYear();
+if (dd < 10) {
+    dd = '0' + dd;
+}
+if (mm < 10) {
+    mm = '0' + mm;
+}
+var today = dd + '/' + mm + '/' + yyyy;
+// document.getElementById('DATE').value = today
 
 var options = {
+    i18n: {
+        optional: ' ',
+        required: ' '
+    },
     fields: {
         latitud:{
             hidden:true
@@ -108,78 +244,151 @@ var options = {
             label: "Procedencia",
             hidden: true
         },
-        viaje: {
-            label: '¿Con quién viaja?' ,// <= label for the name field
-            hidden:false
+        // labels
+        localidad:{
+            label:'Localidad del concurso',editable:false
         },
-        informo: {
-            label: '¿Como se infomó del evento?' ,// <= label for the name field
-            hidden:false
+        fecha:{
+            label:'Fecha del concurso',editable:false
         },
-        motivo: {
-            label: '¿Motivo del viaje?' ,// <= label for the name field
-            hidden:false
+        concurso: {
+            label: 'Nombre del concurso', editable:false
         },
-        gastos: {
-            label: '¿Cuanto estima que gastó durante la estadia por persona por día?', // <= label for the name field
-            hidden:false,
+        gastos_salida:{
+            label: '¿Cuanto Gasto o estima que gastara su Equipo en la Salida de Pesca?'
         },
-        calificacion: {
-            label: '¿Como califica el evento?' // <= label for the name field
+        uso_guia:{
+            label: '¿Contrató guia de pesca?'
         },
-        recomendaria: {
-            label: '¿Recomendaria el evento?' // <= label for the name field
+        cuantas_personas:{
+            label:'¿Cuantas personas conforman el equipo?'
         },
-        alojamiento: {
-            label: '¿En que ciudad se aloja durante su estadía?' ,// <= label for the name field
-            hidden:false
+        tipo_alojamiento:{
+            label:'¿En qué tipo de alojamiento se hospedan?'
         },
-        tipoalojamiento: {
-            label: '¿En que tipo de alojamiento?' ,// <= label for the name field
-            hidden:false
+        cuantas_noches:{
+            label:'¿Cuantas noches pasarán alojados en esta localidad en este viaje?'
         },
-        transporte: {
-            label: '¿Medio de transporte utilizado?' ,// <= label for the name field
-            hidden:false
+        gasto_alojamiento:{
+            label:'¿Cuanto gasto en alojamiento por dia?'
         },
-        primeravez: {
-            label: '¿Primera vez que asiste?' // <= label for the name field
+        cuantos_dias:{
+            label:'¿Cuántos días han venido para participar del concurso o de otras actividades asociadas?'
         },
-        edad: {
-            label: "Edad", maxLength:2, hidden:false,
+        cuantas_participo:{
+            label:'¿Cuántas veces participo en el concurso?'
         },
+        informo:{
+            label:'¿Como se entero de este concurso?'
+        },
+        gasto_inscripcion: {
+            label:'¿Cuanto gasto en Inscripcion?'
+        },
+        gasto_carnada: {
+            label:'... en Carnada Viva?'
+        },
+        gasto_combustible: {
+            label:'... en Combustible para lancha?'
+        },
+        gasto_guia: {
+            label:'... en Guía de pesca?'
+        },
+        gasto_comida: {
+            label:'... en Comida o evento central?'
+        },
+        gasto_licencia_pesca: {
+            label:'... en Licencia de pesca?'
+        },
+        participo_pesca: {
+            label: '¿Ud. ha Participado en otros concursos de pesca?'
+        },
+        modalidad_pesca: {
+            label: '¿Cuál es su modalidad de pesca preferida?'
+        },
+        // 12.
+        actividad_cena:{
+            label:'¿Participó o piensa participar de la Cena/Almuerzo de premiación?'
+        },
+        actividad_show: {
+            label: '¿Participó o piensa participar del Show?'
+        },
+        actividad_exposicion: {
+            label: '¿Participó o piensa participar de la Exposición?'
+        },
+        actividad_feria: {
+            label: '¿Participó o piensa participar de la Feria Artesanal?'
+        },
+        // 13
+        volveria:{
+            label:'¿Volvería a participar de este concurso el año que viene?'
+        },
+        gastos_alimentos:{
+            label:'¿Cuanto gastó o estima que gastaran en Productos Alimenticios?'
+        },
+        gastos_artesanias: {
+            label: '¿Cuanto gastó o estima que gastaran en Artesanías y Souvenirs?'
+        },
+        gastos_equipo_pesca: {
+            label: '¿Cuanto gastó o estima que gastaran en Equipos y Articulos de Pesca?'
+        },
+        gastos_excursiones: {
+            label: '¿Cuanto gastó o estima que gastaran en Excursiones, entrada a predios, o espectáculos?'
+        },
+        gastos_transporte: {
+            label: '¿Cuanto gastó o estima que gastaran en Transporte Local?'
+        },
+        volveria_porque:{
+            label:'¿Por que?',hidden:true
+        },
+        //15
+        volveria_visitar:{
+            label: '¿Volveria a visitar esta localidad?'
+        },
+        // 16 talba
+        evalua_alojamiento:{
+            label:'¿Como evalúa la Oferta de Alojamiento de esta localidad?'
+        },
+evalua_gastronomia:{
+    label:'¿Como evalúa la Oferta de Gastronómica de esta localidad?'
+},
+evalua_info_turistica:{
+    label:'¿Como evalúa la información Turistica de esta localidad?'
+},
+evalua_excursiones:{
+    label:'¿Como evalúa las Excursiones y Paseos de esta localidad?'
+},
+evalua_limpieza:{
+    label:'¿Como evalúa la Limpieza en lugares públicos de esta localidad?'
+},
+evalua_seguridad:{
+    label:'¿Como evalúa la Seguridad esta localidad?'
+},
+evalua_naturaleza:{
+    label:'¿Como evalúa el Cuidado de la Naturaleza de esta localidad?'
+},
+evalua_accesso:{
+    label:'¿Como evalúa el acceso a la Localidad?'
+},
+gasto_salida:{
+    label:'¿Cuanto gastó o estima que gastará en la Salida de Pesca?'
+}
 
-        // condicionales
-        otro_motivo:
-        {
-            label: "Cual?",hidden:true
-        },
-        otros_informo: {
-            label: "Cual?", hidden: true
-        },
-        otro_transporte: {
-            label: "Cual?", hidden: true
-        },
-        viaje_cantidad:{
-            label: "Cuantos?", hidden: true, maxLength: 2
-        }
+
         
+
+
+
     }
 };
 
 var default_values = {
     userid: Constants.installationId,
     procedencia: null,
-    edad:null,
-            viaje: null,
-            motivo: null,
-            alojamiento: null,
-            tipoalojamiento: null,
-            transporte: null,
-            gastos: null,
-            latitud:null,
-            longitud:null,
-            
+    latitud:null,
+    longitud:null,
+    localidad:'Esquina',
+    fecha:today,
+    concurso:'Concurso de Pesca - Esquina 2019'
 }
 //  
 // // // // // // // // // // // // 
@@ -187,7 +396,8 @@ var default_values = {
 
 
 // listado de provincias y paises
-const items = [
+const list_procedencias = [
+    { name: "Esquina", id: "Esquina" },
     { name: "Corrientes", id: "Corrientes" },
     { name: "Tres de Abril", id: "Tres de Abril" },
     { name: "9 de Julio", id: "9 de Julio" },
@@ -206,7 +416,6 @@ const items = [
     { name: "Cruz de los Milagros", id: "Cruz de los Milagros" },
     { name: "Curuzú Cuatiá", id: "Curuzú Cuatiá" },
     { name: "Empedrado", id: "Empedrado" },
-    { name: "Esquina", id: "Esquina" },
     { name: "Estación Torrent", id: "Estación Torrent" },
     { name: "Felipe Yofre", id: "Felipe Yofre" },
     { name: "Garabí", id: "Garabí" },
@@ -1172,68 +1381,114 @@ export default class Encuesta extends React.Component {
         };
     }
 
+    // campos condicionales segun procedencia
     onSelectedItemsChange = selectedItems => {
         this.setState({ selectedItems });
         var update_values = this.state.value;
         update_values.procedencia = selectedItems[0];
         var update_options = this.state.options;
-        if (update_values.procedencia == "Corrientes")
+        if (update_values.procedencia == "Esquina")
         {
             update_options = t.update(update_options, {
                 fields: { 
-                    viaje: { hidden: { '$set': true } },
                     // informo: { hidden: { '$set': true } },
-                    motivo: { hidden: { '$set': true } },
-                    alojamiento: { hidden: { '$set': true } },
-                    tipoalojamiento: { hidden: { '$set': true } },
-                    transporte: { hidden: { '$set': true } },
-                    gastos: { hidden: { '$set': true } },
+                tipo_alojamiento: { hidden: { '$set': true } },
+                cuantas_noches: { hidden: { '$set': true } },
+                gasto_alojamiento: { hidden: { '$set': true } },
+                cuantos_dias: { hidden: { '$set': true } },
+                informo: { hidden: { '$set': true } },
+                volveria_visitar: { hidden: { '$set': true } },
+                volveria_porque: { hidden: { '$set': true } },
+                evalua_alojamiento: { hidden: { '$set': true } },
+                evalua_excursiones: { hidden: { '$set': true } },
+                evalua_limpieza: { hidden: { '$set': true } },
+                evalua_seguridad: { hidden: { '$set': true } },
+                evalua_naturaleza: { hidden: { '$set': true } },
+                evalua_accesso: { hidden: { '$set': true } },
                 }
             });
             // pongo valores "omitido" porque esta en corrientes
-         
         }
         else
         {
             update_options = t.update(update_options, {
                 fields: {
-                    viaje: { hidden: { '$set': false } },
-                    // informo: { hidden: { '$set': false } },
-                    motivo: { hidden: { '$set': false } },
-                    alojamiento: { hidden: { '$set': false } },
-                    tipoalojamiento: { hidden: { '$set': false } },
-                    transporte: { hidden: { '$set': false } },
-                    gastos: { hidden: { '$set': false } },
+                    tipo_alojamiento: { hidden: { '$set': false } },
+                    cuantas_noches: { hidden: { '$set': false } },
+                    gasto_alojamiento: { hidden: { '$set': false } },
+                    cuantos_dias: { hidden: { '$set': false } },
+                    informo: { hidden: { '$set': false } },
+                    volveria_visitar: { hidden: { '$set': false } },
+                    volveria_porque: { hidden: { '$set': false } },
+                    evalua_alojamiento: { hidden: { '$set': false } },
+                    evalua_excursiones: { hidden: { '$set': false } },
+                    evalua_limpieza: { hidden: { '$set': false } },
+                    evalua_seguridad: { hidden: { '$set': false } },
+                    evalua_naturaleza: { hidden: { '$set': false } },
+                    evalua_accesso: { hidden: { '$set': false } },
                 }
             });
-           
         }
-
         this.setState({ options: update_options, value: update_values });
-
-        
     };
     
+    /**
+     * ACTUALIZO CONTADOR DE ENCUESTA (se llama cada 10 segundos*)
+     */
+    _updateCount = async () => {
+        let count = await AsyncStorage.getItem('count');
+        count = parseInt(count) + 1;
+        AsyncStorage.setItem('count', count.toString() );
+        console.log("update counter");
+    }
 
 
-
+    /**
+     * GUARDAR DATOS EN LOCAL
+     */
     saveData = async () => {
         try {
             
             nuevo = this._form.getValue(); // use that ref to get the form value
             ///get current data
             if(!nuevo){
-                alert("complete todo los campos")
+                alert("Complete todo los campos");
                 return
             }
 
-            let data = await AsyncStorage.getItem('data');
+            // Comprobar Valores condicionales si estan completos
+            if(nuevo.procedencia !== "Esquina" )
+            {
+                if (
+                nuevo.tipo_alojamiento == undefined ||
+                nuevo.cuantas_noches == undefined ||
+                nuevo.gasto_alojamiento == undefined ||
+                nuevo.cuantos_dias == undefined ||
+                nuevo.informo == undefined ||
+                nuevo.volveria_visitar == undefined ||
+                // nuevo.volveria_porque == undefined ||
+                nuevo.evalua_alojamiento == undefined ||
+                nuevo.evalua_excursiones == undefined ||
+                nuevo.evalua_limpieza == undefined ||
+                nuevo.evalua_seguridad == undefined ||
+                nuevo.evalua_naturaleza == undefined ||
+                nuevo.evalua_accesso == undefined                    
+                ) 
+                {
+                    alert("Complete todo los campos.");
+                    return;
+                }
+            }
+           
+            
+            
+            let data = await AsyncStorage.getItem('data');// obtengo registros guardados anteriormente
             if (data !== null)//ya hay algo cargado?
             {
                 //convierto string a objeto !
                 var data = JSON.parse(data);
                 //nuevo objeto 
-                // var nuevo = { nombre: 'ivan', apellido: 'sambrana' };
+                // var nuevo = { nombre: 'ivan', apellido: 'sambrana' };///se crea al inicio del metodos
                 
                 //inserto nuevo objeto
                 data.push(nuevo);
@@ -1242,7 +1497,7 @@ export default class Encuesta extends React.Component {
                 //guardo en el coso locol
                 AsyncStorage.setItem('data', data);
                 //muestro en consola por la dua
-                console.log("data")
+                console.log("data: ")
                 console.log(data);
 
             }
@@ -1256,92 +1511,64 @@ export default class Encuesta extends React.Component {
             }
 
             alert("Encuesta Guardada")
-            this.setState({ value: null });
-            this.setState({count:data.length})
-            this.props.navigation.navigate("Home",{data:{count:this.state.count}})
+
+
+            this.setState({ value: null });//TODO no me acuerdo para que puse
+            this.setState({count:data.length})//actualizo contador FORCED
+            this._updateCount();
+            this.props.navigation.navigate("Home")//vuelvo a Home
         } catch (error) {
             console.log(error)
         }
 
     }
+
+    /** 
+     * Evento ONCHANGE en CUALQUIER elemento del FORM
+    */
   
     onChange = (value)=>{
         var update_options = this.state.options;
         
-        // como se informo del evento?
         console.log("onchange!!!!!");
         
-       if(value.informo){ if(value.informo == 'otro'){
-            update_options = t.update(update_options, {
-                fields: { otros_informo: {  hidden: { '$set': false } } }
-            });
-        }
-        else{
-            update_options = t.update(update_options, {
-                fields: { otros_informo: { hidden: { '$set': true }}
-                }
-            });
-        }}
+            // SNIPPED: activar campos OTROS
+        if (value.volveria_visitar) {
+            if (value.volveria_visitar == 'No'){
+                update_options = t.update(update_options, {
+                    fields: { volveria_porque: {  hidden: { '$set': false } } }
+                });
+            }
+            else{
+                update_options = t.update(update_options, {
+                    fields: {
+                        volveria_porque: { hidden: { '$set': true }}
+                    }
+                });
+            }}
 
-        /// motivo del viaje
-        if (value.motivo){if (value.motivo == 'otro') {
-            update_options = t.update(update_options, {
-                fields: {otro_motivo: {hidden: { '$set': false }}}
-            });
-        }
-        else {
-            update_options = t.update(update_options, {
-                fields: { otro_motivo: { hidden: { '$set': true }}}
-            });
-        }}
-        /// transporte
-        if(value.informo){if (value.transporte == 'otro') {
-            update_options = t.update(update_options, {
-                fields: { otro_transporte: { hidden: { '$set': false } } }
-            });
-        }
-        else {
-            update_options = t.update(update_options, {
-                fields: { otro_transporte: { hidden: { '$set': true } } }
-            });
-        }}
-        /// grupo familiar
-        if(value.viaje){if (value.viaje == 'familia' || value.viaje == 'amigos') {
-            update_options = t.update(update_options, {
-                fields: { viaje_cantidad: { hidden: { '$set': false } } }
-            });
-        }
-        else {
-            update_options = t.update(update_options, {
-                fields: { viaje_cantidad: { hidden: { '$set': true } } }
-            });
-        }
-        ///autofill si es solo o pareja
-            if (value.viaje == 'solo') {
-                value.viaje_cantidad = 1;
-            }
-            if (value.viaje == 'pareja') {
-                value.viaje_cantidad = 2;
-            }
-        }
+        
 
         var d = new Date()
-        value.timestamp = d.getTime()+""
+        value.timestamp = Math.round(d.getTime()/1000)+""//obtiene el timestamp en microsegundo /1000 milisegundos
        
-        if (this.state.errorMessage) {
-            
-    } else if (this.state.location) {
-      // text = JSON.stringify(this.state.location);
-            value.longitud= this.state.location.coords.longitude ;
+        if (this.state.errorMessage) 
+        {
+                // si no hay permisos de geo pues no hago nada toma por defecto los null
+        } else if (this.state.location) {
+            // text = JSON.stringify(this.state.location);
+            value.longitud=    this.state.location.coords.longitude ;
             value.latitud =     this.state.location.coords.latitude;
-    }
+        }
 
 
-        this.setState({ options: update_options, value: value });
+        this.setState({ options: update_options, value: value });///actualizo todo
         console.log(value);
     }
 
-    ///GEO
+    /**
+     * ONLOAD pedir permisos de GEO
+     */
  componentWillMount() {
     if (Platform.OS === 'android' && !Constants.isDevice) {
       this.setState({
@@ -1351,9 +1578,11 @@ export default class Encuesta extends React.Component {
       this._getLocationAsync();
     }
 
-
   }
 
+  /**
+   * OBTENER GEO
+   */
   _getLocationAsync = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status !== 'granted') {
@@ -1362,13 +1591,15 @@ export default class Encuesta extends React.Component {
       });
     }
 
-    let location = await Location.getCurrentPositionAsync({ maximumAge : 300000});
+    let location = await Location.getCurrentPositionAsync({ maximumAge : 300000});//cada 5 minutos
     this.setState({ location });
     console.log("Get LOcation")
     console.log(location);
   }
 
-  ///cout
+  /**
+   * Cantidad de registros en memoria
+   */
     _getRegCount = async () => {
         let count = 0;
         let data = await AsyncStorage.getItem('data');
@@ -1410,18 +1641,18 @@ export default class Encuesta extends React.Component {
                        <View>
                             <Text style={{
                                 fontSize: 17, marginBottom: 10,
-        fontWeight: '500'}}>Procedencia</Text>
+        fontWeight: '500'}}>Lugar de Residencia</Text>
                                 
                         
                         </View>
                         <MultiSelect
                             hideTags
-                            items={items}
+                            items={list_procedencias}
                             uniqueKey="id"
                             ref={(component) => { this.multiSelect = component }}
                             onSelectedItemsChange={this.onSelectedItemsChange}
                             selectedItems={selectedItems}
-                            selectText="Procedencia"
+                            selectText="Lugar de Residencia"
                             searchInputPlaceholderText="Buscar..."
                             onChangeInput={(text) => console.log(text)}
                             // altFontFamily="ProximaNova-Light"
@@ -1439,7 +1670,7 @@ export default class Encuesta extends React.Component {
                         />
                         <Form
                             ref={c => this._form = c} // assign a ref
-                            type={User}
+                            type={Formulario}
                             options={this.state.options}
                             value={this.state.value}
                             onChange={this.onChange}
@@ -1514,7 +1745,5 @@ t.form.Form.stylesheet.select.normal.backgroundColor = "white";
 
 t.form.Form.stylesheet.textbox.error.backgroundColor = "white";
 t.form.Form.stylesheet.select.error.backgroundColor = "white";
-
-
 
 
