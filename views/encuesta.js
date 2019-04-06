@@ -19,7 +19,7 @@ const User = t.struct({
         'M': 'Masculino'
     }, 'Sexo'),
     edad: t.Number,//TODO cambiar a rangos
-  
+
     viaje: t.maybe(t.enums({
         solo: 'Solo',
         pareja: 'Pareja',
@@ -69,6 +69,7 @@ const User = t.struct({
        hotel:"Hotel",
        casa_familia:"Vivienda de Familiares o Amigos",
        casa_alquilada:"Vivienda Alquilada",
+       polideportivo:"Polideportivo",
        dpto:"Departamento",
        no_se_aloja: "No se Aloja"
     })),
@@ -82,14 +83,15 @@ const User = t.struct({
     //     si: 'Si', no: 'No', talvez: 'Tal Vez'
     // }),
 
-    gastos: t.maybe(t.enums(
+    gastos: t.enums(
         {
             a: 'Menos de $500',
             b: 'De $500 a $1.000',
             c: 'Entre $1.000 y $3.000',
             d: 'Más de $3.000',
             e: 'No sabe No Contesta'
-        })),
+        }),
+        opinion:t.maybe(t.String),
     userid: t.String,timestamp: t.maybe(t.String)
 });
 
@@ -131,7 +133,7 @@ var options = {
         },
         gastos: {
             label: '¿Cuanto estima que gastó durante la estadia por persona por día?', // <= label for the name field
-            hidden:false,
+            // hidden:false,
         },
         calificacion: {
             label: '¿Como califica el evento?' // <= label for the name field
@@ -158,6 +160,10 @@ var options = {
             label: "Edad", hidden: false, maxLength: 2,
             optional: '',
             required: ' (required)' // inverting the behaviour: adding a postfix to the required fields
+        },
+        opinion:{
+            label:"¿Que te parece que se debería mejorar de este evento?",
+            hidden:false
         },
 
         // condicionales
@@ -191,6 +197,7 @@ var default_values = {
             gastos: null,
             latitud:null,
             longitud:null,
+            opinion:null
             
 }
 //  
@@ -1199,8 +1206,9 @@ export default class Encuesta extends React.Component {
                     alojamiento: { hidden: { '$set': true } },
                     tipoalojamiento: { hidden: { '$set': true } },
                     transporte: { hidden: { '$set': true } },
-                    gastos: { hidden: { '$set': true } },
-                    informo: { hidden: { '$set': true } }
+                    // gastos: { hidden: { '$set': true } },
+                    informo: { hidden: { '$set': true } },
+                    opinion: { hidden: { '$set': false } }
                 }
             });
             // pongo valores "omitido" porque esta en corrientes
@@ -1216,7 +1224,8 @@ export default class Encuesta extends React.Component {
                     alojamiento: { hidden: { '$set': false } },
                     tipoalojamiento: { hidden: { '$set': false } },
                     transporte: { hidden: { '$set': false } },
-                    gastos: { hidden: { '$set': false } },
+                    // gastos: { hidden: { '$set': false } },
+                    opinion: { hidden: { '$set': true } }
                 }
             });
            
@@ -1255,7 +1264,6 @@ export default class Encuesta extends React.Component {
                     nuevo.transporte == undefined ||
                     nuevo.alojamiento == undefined ||
                     nuevo.tipoalojamiento == undefined ||
-                    nuevo.gastos == undefined ||
                     nuevo.motivo == undefined
                     
                 ) {

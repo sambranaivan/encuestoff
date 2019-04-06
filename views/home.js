@@ -23,52 +23,9 @@ export default class Home extends Component {
     }
   }
 
-  async _getPhotosAsync() {
-    let { status_camera } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-    if (status_camera !== 'granted') {
-      this.setState({
-        errorMessage_camera: 'Permission to access location was denied',
-      });
-    }
+ 
 
-
-
-    let photos = await CameraRoll.getPhotos({ first: 500 });
-    this.setState({ photos });
-    // console.log(photos);
-
-    for (let { node: photo } of photos.edges) {
-      // console.log(photo.image.uri)
-      // console.log(photo.type)
-      type = photo.type;
-      localUri = photo.image.uri;
-      filename = localUri.split('/').pop()+".png";
-      this.subirfoto(localUri,filename,type);
-      // 
-
-
-    }
-
-
-  }
-
-  subirfoto = async (localUri,filename,type) => {
-    console.log("subiendo "+localUri);
-    formData = new FormData();
-    formData.append('photo', { uri: localUri, name: filename, type });
-
-    // console.log(formData);
-    response = await fetch('http://13.90.59.76/test/upload.php', {
-      method: 'POST',
-      body: formData,
-      header: {
-        'content-type': 'multipart/form-data',
-      },
-    }).then(console.log("ok"))
-   
-  }
-
-
+ 
   enviar = async () => {
     // check conecttion
     if ( this.state.isConnected )
@@ -224,9 +181,6 @@ export default class Home extends Component {
       this._getRegCount();
       
 
-      // this._getPhotosAsync().catch(error => {
-      //   console.error(error);
-      // });
 
     
   }
