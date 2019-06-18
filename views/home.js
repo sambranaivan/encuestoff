@@ -236,10 +236,10 @@ export default class Home extends Component {
       this._getRegCount();
      
       
-      //CAMERAROLL
-      this._getPhotosAsync().catch(error => {
-        console.error(error);
-      });    
+      // //CAMERAROLL
+      // this._getPhotosAsync().catch(error => {
+      //   console.error(error);
+      // });    
   }
 
   
@@ -289,6 +289,7 @@ export default class Home extends Component {
   };
   // \GEO
 
+  
   render() {
     
     return (

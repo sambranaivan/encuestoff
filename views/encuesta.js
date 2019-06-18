@@ -386,9 +386,9 @@ var default_values = {
     procedencia: null,
     latitud:null,
     longitud:null,
-    localidad:'Esquina',
+    localidad:'Goya',
     fecha:today,
-    concurso:'Concurso de Pesca - Esquina 2019'
+    concurso:'Fiesta Nacional del Surubí 2019'
 }
 //  
 // // // // // // // // // // // // 
@@ -397,7 +397,7 @@ var default_values = {
 
 // listado de provincias y paises
 const list_procedencias = [
-    { name: "Esquina", id: "Esquina" },
+    { name: "Goya", id: "Goya" },
     { name: "Corrientes", id: "Corrientes" },
     { name: "Tres de Abril", id: "Tres de Abril" },
     { name: "9 de Julio", id: "9 de Julio" },
@@ -415,6 +415,7 @@ const list_procedencias = [
     { name: "Concepción", id: "Concepción" },
     { name: "Cruz de los Milagros", id: "Cruz de los Milagros" },
     { name: "Curuzú Cuatiá", id: "Curuzú Cuatiá" },
+    { name: "Esquina", id: "Esquina" },
     { name: "Empedrado", id: "Empedrado" },
     { name: "Estación Torrent", id: "Estación Torrent" },
     { name: "Felipe Yofre", id: "Felipe Yofre" },
@@ -422,7 +423,6 @@ const list_procedencias = [
     { name: "Garruchos", id: "Garruchos" },
     { name: "Gobernador Martinez", id: "Gobernador Martinez" },
     { name: "Gobernador V. Virasoro", id: "Gobernador V. Virasoro" },
-    { name: "Goya", id: "Goya" },
     { name: "Guaviraví", id: "Guaviraví" },
     { name: "Herliztka", id: "Herliztka" },
     { name: "Ita Ibaté", id: "Ita Ibaté" },
