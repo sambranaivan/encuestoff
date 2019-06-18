@@ -204,7 +204,6 @@ const Formulario = t.struct({
 
 
 
-
 });
 
 var today = new Date();
@@ -1442,6 +1441,8 @@ export default class Encuesta extends React.Component {
         console.log("update counter");
     }
 
+        
+    }
 
     /**
      * GUARDAR DATOS EN LOCAL

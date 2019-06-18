@@ -23,13 +23,7 @@ export default class Home extends Component {
     }
   }
 
-  async _getPhotosAsync() {
-    let { status_camera } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-    if (status_camera !== 'granted') {
-      this.setState({
-        errorMessage_camera: 'Permission to access location was denied',
-      });
-    }
+
 
 
 
@@ -69,6 +63,7 @@ export default class Home extends Component {
   }
 
 
+ 
   enviar = async () => {
     // check conecttion
     // Alert.alert(
@@ -234,12 +229,10 @@ export default class Home extends Component {
     );
       ///inicializo el contador
       this._getRegCount();
-     
       
-      // //CAMERAROLL
-      // this._getPhotosAsync().catch(error => {
-      //   console.error(error);
-      // });    
+
+
+    
   }
 
   
@@ -265,6 +258,7 @@ export default class Home extends Component {
     else {
       count = 0;
     }
+   
 
     
 
@@ -272,7 +266,7 @@ export default class Home extends Component {
     this.setState({count:count});
     AsyncStorage.setItem('count', count.toString());
     // a partir de aca leo las variables internas nomas?
-    setInterval(this._updateCount,30000)
+    setInterval(this._updateCount,15000)
 
   }
 
