@@ -319,6 +319,7 @@ export default class Home extends Component {
 
         </View>
         <View style={styles.header}>
+        
           <Text style={{ color: "#9a9a9a"}}>{Constants.installationId}</Text>
         </View>
       
